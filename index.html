@@ -13,18 +13,17 @@
   <div id="hud">
     <div class="hud-row">
       <div class="hud-pill">STAGE <span id="stageVal">1</span>/<span id="stageMaxVal">50</span></div>
-      <div class="hud-pill">Lv.<span id="lvVal">1</span></div>
+      <div class="hud-pill">兵力 <span id="heroCountVal">0</span></div>
       <div class="hud-pill">GOLD <span id="goldVal">0</span></div>
     </div>
     <div id="lives"></div>
-    <div id="xpBarWrap"><div id="xpBarFill"></div></div>
   </div>
 
   <div id="stageClearBanner" class="hidden">ステージクリア!</div>
 
   <div id="routeChoice" class="overlay hidden">
-    <h2>ルート選択</h2>
-    <p class="route-sub">進化の道を選べ</p>
+    <h2>進化選択</h2>
+    <p class="route-sub">10の兵士をどちらに進化させる?</p>
     <div class="cards">
       <button class="route-card" id="cardA">
         <div class="card-name" id="cardAName">ゴッドキング</div>
@@ -45,9 +44,11 @@
     <h1>ペタペタペンギン団</h1>
     <p class="subtitle">ペンギンタワーディフェンスRPG(広告再現版)</p>
     <div class="howto">
-      <p>ヒーローは自動で近くの敵を攻撃する</p>
-      <p>画面タップ / スキルボタンで範囲スキル発動</p>
-      <p>レベルアップで「ルート選択」進化のチャンス!</p>
+      <p>「+」マスに配置された兵士は自動で敵を攻撃する</p>
+      <p>同じ数字の兵士を2体タップすると合体して強くなる(例:1+1→3)</p>
+      <p>合体すると人数は減るが1体の攻撃力は上がる</p>
+      <p>フィールドに出る歯車を隣接した兵士で攻撃して破壊すると新しい兵士が仲間に!</p>
+      <p>数字が「10」になる合体で進化選択が発生。成功率が低いほど強い進化に</p>
       <p>祭壇に敵の侵入を許すとライフが減る。0でステージ失敗</p>
     </div>
     <button id="startBtn">タップしてスタート</button>
@@ -56,12 +57,11 @@
   <div id="failScreen" class="overlay hidden">
     <h1 class="fail-title">挑戦失敗</h1>
     <p class="fail-stage">第<span id="failStageVal">1</span>/50ステージ</p>
-    <p>Lv.<span id="failLvVal">1</span> / GOLD <span id="failGoldVal">0</span></p>
+    <p>最大兵力 <span id="failPowerVal">1</span> / GOLD <span id="failGoldVal">0</span></p>
     <p id="newBestMsg" class="hidden">🎉 ベスト更新!</p>
     <button id="retryBtn">もういちど挑戦</button>
   </div>
 
-  <button id="skillBtn">スキル</button>
   <button id="muteBtn" title="mute">🔊</button>
 </div>
 

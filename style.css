@@ -87,22 +87,6 @@ html, body {
   background: rgba(255,255,255,0.15);
 }
 
-#xpBarWrap {
-  width: min(70%, 260px);
-  height: 8px;
-  background: rgba(0,0,0,0.4);
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.25);
-}
-
-#xpBarFill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #6be3ff, #4fa8ff);
-  transition: width 0.2s ease;
-}
-
 /* ---------- Stage clear banner ---------- */
 #stageClearBanner {
   position: absolute;
@@ -159,9 +143,12 @@ html, body {
   border-radius: 12px;
   padding: 12px 18px;
   margin-bottom: 12px;
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: 12.5px;
+  line-height: 1.7;
   color: #eafff0;
+  max-height: 40vh;
+  overflow-y: auto;
+  max-width: 340px;
 }
 
 .overlay button {
@@ -263,32 +250,6 @@ html, body {
 }
 
 /* ---------- Buttons ---------- */
-#skillBtn {
-  position: absolute;
-  bottom: max(22px, env(safe-area-inset-bottom));
-  right: 20px;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.6);
-  background: radial-gradient(circle at 35% 30%, #7CFFCB, #17b978 70%, #0b6b45);
-  color: #06331f;
-  font-weight: 900;
-  font-size: 14px;
-  z-index: 6;
-  touch-action: manipulation;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.3);
-}
-
-#skillBtn:disabled {
-  filter: grayscale(0.8);
-  opacity: 0.55;
-}
-
-#skillBtn:active:not(:disabled) {
-  transform: translateY(3px);
-}
-
 #muteBtn {
   position: absolute;
   top: max(10px, env(safe-area-inset-top));
