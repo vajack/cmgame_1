@@ -141,7 +141,7 @@
 
   function spawnEnemy() {
     const elapsed = stage.duration - stage.timer;
-    const waveSize = 1 + Math.min(3, Math.floor(stage.index / 8));
+    const waveSize = 1 + Math.min(3, Math.floor(stage.index / 6));
     const avoid = 0.55;
     for (let i = 0; i < waveSize; i++) {
       const level = enemyLevelFor(stage.index, elapsed);
@@ -354,7 +354,7 @@
     // spawn
     stage.spawnTimer -= dt;
     const elapsed = stage.duration - stage.timer;
-    const interval = Math.max(0.4, 1.1 - stage.index * 0.012 - elapsed * 0.01);
+    const interval = Math.max(0.35, 1.1 - stage.index * 0.016 - elapsed * 0.012);
     if (stage.spawnTimer <= 0) {
       spawnEnemy();
       stage.spawnTimer = interval;
@@ -400,7 +400,7 @@
       target.hitFlash = 0.25;
       target.slash = { x: enemyPos(target).x, y: enemyPos(target).y, t: 0 };
       sfx.hit();
-      hero.atkTimer = Math.max(0.18, 0.46 - hero.level * 0.004);
+      hero.atkTimer = Math.max(0.22, 0.46 - hero.level * 0.003);
     }
 
     // enemy death / xp
