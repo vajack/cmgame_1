@@ -141,7 +141,7 @@
 
   function spawnEnemy() {
     const elapsed = stage.duration - stage.timer;
-    const waveSize = 1 + Math.min(3, Math.floor(stage.index / 8));
+    const waveSize = 1 + Math.min(4, Math.floor(stage.index / 7));
     const avoid = 0.55;
     for (let i = 0; i < waveSize; i++) {
       const level = enemyLevelFor(stage.index, elapsed);
@@ -265,7 +265,7 @@
 
   // ---------- Skill ----------
   let skillCooldown = 0;
-  const SKILL_MAX_CD = 8;
+  const SKILL_MAX_CD = 13;
   function tryUseSkill() {
     if (state !== STATE.PLAYING || skillCooldown > 0) return;
     skillCooldown = SKILL_MAX_CD;
@@ -354,7 +354,7 @@
     // spawn
     stage.spawnTimer -= dt;
     const elapsed = stage.duration - stage.timer;
-    const interval = Math.max(0.35, 1.1 - stage.index * 0.016 - elapsed * 0.012);
+    const interval = Math.max(0.3, 1.1 - stage.index * 0.02 - elapsed * 0.012);
     if (stage.spawnTimer <= 0) {
       spawnEnemy();
       stage.spawnTimer = interval;
