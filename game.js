@@ -141,7 +141,7 @@
 
   function spawnEnemy() {
     const elapsed = stage.duration - stage.timer;
-    const waveSize = 1 + Math.min(3, Math.floor(stage.index / 6));
+    const waveSize = 1 + Math.min(3, Math.floor(stage.index / 8));
     const avoid = 0.55;
     for (let i = 0; i < waveSize; i++) {
       const level = enemyLevelFor(stage.index, elapsed);
