@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ペタペタペンギン団 - 広告風アリーナRPG</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="hud-row">
+      <div class="hud-pill">STAGE <span id="stageVal">1</span>/<span id="stageMaxVal">50</span></div>
+      <div class="hud-pill">Lv.<span id="lvVal">1</span></div>
+      <div class="hud-pill">GOLD <span id="goldVal">0</span></div>
+    </div>
+    <div id="lives"></div>
+    <div id="xpBarWrap"><div id="xpBarFill"></div></div>
+  </div>
+
+  <div id="stageClearBanner" class="hidden">ステージクリア!</div>
+
+  <div id="routeChoice" class="overlay hidden">
+    <h2>ルート選択</h2>
+    <p class="route-sub">進化の道を選べ</p>
+    <div class="cards">
+      <button class="route-card" id="cardA">
+        <div class="card-name" id="cardAName">ゴッドキング</div>
+        <div class="card-stat" id="cardAAtk">攻撃力+0%</div>
+        <div class="card-stat" id="cardARate">成功確率:0%</div>
+        <div class="card-stars" id="cardAStars">★★★★★</div>
+      </button>
+      <button class="route-card" id="cardB">
+        <div class="card-name" id="cardBName">ゴッドキング</div>
+        <div class="card-stat" id="cardBAtk">攻撃力+0%</div>
+        <div class="card-stat" id="cardBRate">成功確率:0%</div>
+        <div class="card-stars" id="cardBStars">★★★★★</div>
+      </button>
+    </div>
+  </div>
+
+  <div id="startScreen" class="overlay">
+    <h1>ペタペタペンギン団</h1>
+    <p class="subtitle">ペンギンタワーディフェンスRPG(広告再現版)</p>
+    <div class="howto">
+      <p>ヒーローは自動で近くの敵を攻撃する</p>
+      <p>画面タップ / スキルボタンで範囲スキル発動</p>
+      <p>レベルアップで「ルート選択」進化のチャンス!</p>
+      <p>祭壇に敵の侵入を許すとライフが減る。0でステージ失敗</p>
+    </div>
+    <button id="startBtn">タップしてスタート</button>
+  </div>
+
+  <div id="failScreen" class="overlay hidden">
+    <h1 class="fail-title">挑戦失敗</h1>
+    <p class="fail-stage">第<span id="failStageVal">1</span>/50ステージ</p>
+    <p>Lv.<span id="failLvVal">1</span> / GOLD <span id="failGoldVal">0</span></p>
+    <p id="newBestMsg" class="hidden">🎉 ベスト更新!</p>
+    <button id="retryBtn">もういちど挑戦</button>
+  </div>
+
+  <button id="skillBtn">スキル</button>
+  <button id="muteBtn" title="mute">🔊</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
