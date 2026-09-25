@@ -65,7 +65,7 @@
   };
 
   // ---------- Persistent best ----------
-  const BEST_KEY = "petapeta_best_stage";
+  const BEST_KEY = "circle_td_best_stage";
   let bestStage = parseInt(localStorage.getItem(BEST_KEY) || "1", 10);
 
   // ---------- DOM refs ----------
@@ -119,6 +119,12 @@
     return Math.abs(normalizeAngle(ALTAR_ANGLE - angle));
   }
 
+  // Attack range grows with tier: value-1 heroes can barely reach past the
+  // field's edge, later tiers reach across the whole arena.
+  function heroRangePx(tierIndex) {
+    return Math.min(R * 1.9, R * (0.52 + tierIndex * 0.13));
+  }
+
   // ---------- Hex slot grid ----------
   function buildSlotCoords() {
     const coords = [];
@@ -140,10 +146,6 @@
     }
   }
 
-  function hexDistance(a, b) {
-    return (Math.abs(a.q - b.q) + Math.abs(a.r - b.r) + Math.abs(a.q + a.r - b.q - b.r)) / 2;
-  }
-
   function makeHero(tierIndex) {
     return { tierIndex, attack: TIERS[tierIndex], atkTimer: Math.random() * HERO_ATK_INTERVAL, evolved: false, theme: null, flashHit: 0 };
   }
@@ -162,8 +164,13 @@
     selectedSlot = -1;
     maxPower = 1;
     for (const s of slots) s.hero = null;
-    const starters = slots.filter((s) => hexDistance(s, { q: 0, r: 0 }) <= 1);
-    for (let i = 0; i < 3 && i < starters.length; i++) starters[i].hero = makeHero(0);
+    // Place starters on the outer ring, spread 90° apart: a tier-1 hero's
+    // short range only reaches the enemy path from near the field's edge.
+    const outerCoords = [{ q: 2, r: 0 }, { q: -1, r: 2 }, { q: -2, r: 0 }, { q: 1, r: -2 }];
+    for (const c of outerCoords) {
+      const slot = slots.find((s) => s.q === c.q && s.r === c.r);
+      if (slot) slot.hero = makeHero(0);
+    }
     startStage();
   }
 
@@ -483,37 +490,48 @@
     }
     enemies = enemies.filter((e) => !e.breach);
 
-    // hero attacks
+    // hero attacks (range grows with tier; timer only resets on an actual hit)
     for (const slot of slots) {
       const hero = slot.hero;
       if (!hero) continue;
       hero.atkTimer -= dt;
       hero.flashHit = Math.max(0, hero.flashHit - dt * 2);
       if (hero.atkTimer > 0) continue;
-      hero.atkTimer = HERO_ATK_INTERVAL;
 
-      const nearGear = gear && hexDistance(slot, slots[gear.slotIdx]) <= 1;
-      if (nearGear) {
-        gear.hp -= hero.attack;
-        hero.flashHit = 1;
-        burst(slots[gear.slotIdx].x, slots[gear.slotIdx].y, "#7CFFCB", 3, 60);
-        sfx.hit();
-        if (gear.hp <= 0) breakGear();
-        continue;
+      const range = heroRangePx(hero.tierIndex);
+      let attacked = false;
+
+      if (gear) {
+        const gp = slots[gear.slotIdx];
+        if (Math.hypot(gp.x - slot.x, gp.y - slot.y) <= range) {
+          gear.hp -= hero.attack;
+          hero.flashHit = 1;
+          burst(gp.x, gp.y, "#7CFFCB", 3, 60);
+          sfx.hit();
+          if (gear.hp <= 0) breakGear();
+          attacked = true;
+        }
       }
 
-      if (enemies.length === 0) continue;
-      let target = enemies[0];
-      let best = angularDistToAltar(target.angle);
-      for (const e of enemies) {
-        const d = angularDistToAltar(e.angle);
-        if (d < best) { best = d; target = e; }
+      if (!attacked && enemies.length > 0) {
+        let target = null, best = Infinity;
+        for (const e of enemies) {
+          const p = enemyPos(e);
+          if (Math.hypot(p.x - slot.x, p.y - slot.y) > range) continue;
+          const d = angularDistToAltar(e.angle);
+          if (d < best) { best = d; target = e; }
+        }
+        if (target) {
+          target.hp -= hero.attack;
+          target.hitFlash = 0.25;
+          target.slash = { x: slot.x, y: slot.y, t: 0 };
+          hero.flashHit = 1;
+          sfx.hit();
+          attacked = true;
+        }
       }
-      target.hp -= hero.attack;
-      target.hitFlash = 0.25;
-      target.slash = { x: slot.x, y: slot.y, t: 0 };
-      hero.flashHit = 1;
-      sfx.hit();
+
+      if (attacked) hero.atkTimer = HERO_ATK_INTERVAL;
     }
 
     for (const e of enemies) {
@@ -634,7 +652,43 @@
 
   function tierColor(tierIndex) {
     const hue = (tierIndex * 42) % 360;
-    return `hsl(${hue}, 65%, 55%)`;
+    return `hsl(${hue}, 55%, 45%)`;
+  }
+
+  function drawHeroCharacter(x, y, k, bodyColor, flashHit) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(0, k * 0.95, k * 0.62, k * 0.16, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ff9f1c";
+    ctx.beginPath(); ctx.ellipse(-k * 0.26, k * 0.72, k * 0.17, k * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(k * 0.26, k * 0.72, k * 0.17, k * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-k * 0.4, -k * 0.15, k * 0.8, k * 0.85);
+
+    ctx.strokeStyle = "#d8d8e0";
+    ctx.lineWidth = Math.max(1.5, k * 0.13);
+    ctx.beginPath();
+    ctx.moveTo(k * 0.4, -k * 0.05);
+    ctx.lineTo(k * 0.78, -k * 0.5);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffd7a8";
+    ctx.beginPath(); ctx.arc(0, -k * 0.55, k * 0.4, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = "#3a2a1a";
+    ctx.beginPath(); ctx.arc(0, -k * 0.62, k * 0.4, Math.PI, 0); ctx.fill();
+
+    if (flashHit > 0) {
+      ctx.fillStyle = `rgba(255,255,255,${flashHit * 0.5})`;
+      ctx.beginPath(); ctx.arc(0, -k * 0.1, k * 1.05, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
   }
 
   function drawSlots() {
@@ -652,33 +706,41 @@
       }
       const hero = s.hero;
       const rad = Math.min(hexSize * 0.42, 20);
+
       if (i === selectedSlot) {
+        const range = heroRangePx(hero.tierIndex);
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,224,102,0.45)";
+        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, range, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
         ctx.strokeStyle = "#ffe066";
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(s.x, s.y, rad + 5 + Math.sin(performance.now() / 150) * 2, 0, Math.PI * 2);
         ctx.stroke();
       }
-      if (hero.flashHit > 0) {
-        ctx.fillStyle = `rgba(255,255,255,${hero.flashHit * 0.6})`;
-        ctx.beginPath(); ctx.arc(s.x, s.y, rad + 5, 0, Math.PI * 2); ctx.fill();
+
+      if (hero.evolved) {
+        ctx.fillStyle = hero.theme === "fire" ? "rgba(255,120,60,0.35)" : "rgba(120,190,255,0.35)";
+        ctx.beginPath(); ctx.arc(s.x, s.y, rad + 8, 0, Math.PI * 2); ctx.fill();
       }
-      let fillColor = tierColor(hero.tierIndex);
-      if (hero.theme === "fire") fillColor = hero.evolved ? "#c0392b" : "#8a4040";
-      if (hero.theme === "ice") fillColor = hero.evolved ? "#2e6fbf" : "#3f5f80";
-      ctx.fillStyle = fillColor;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, rad, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = hero.evolved ? "#ffe066" : "rgba(255,255,255,0.6)";
-      ctx.lineWidth = hero.evolved ? 3 : 2;
-      ctx.stroke();
+
+      let bodyColor = tierColor(hero.tierIndex);
+      if (hero.theme === "fire") bodyColor = hero.evolved ? "#c0392b" : "#8a4040";
+      if (hero.theme === "ice") bodyColor = hero.evolved ? "#2e6fbf" : "#3f5f80";
+      drawHeroCharacter(s.x, s.y, rad, bodyColor, hero.flashHit);
+
       ctx.fillStyle = "#fff";
-      ctx.font = `bold ${Math.round(rad * 0.75)}px sans-serif`;
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 3;
+      ctx.font = "bold 13px sans-serif";
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(hero.attack, s.x, s.y + 1);
-      ctx.textBaseline = "alphabetic";
+      ctx.strokeText(hero.attack, s.x, s.y - rad - 6);
+      ctx.fillText(hero.attack, s.x, s.y - rad - 6);
     }
   }
 
