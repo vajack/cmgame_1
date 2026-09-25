@@ -101,7 +101,7 @@
   let enemies = [], particles = [], flashTexts = [], shake = 0, gold = 0, pendingCards = null;
   let slots = [];
   let gear = null;
-  let gearSpawnTimer = 6;
+  let gearSpawnTimer = 4;
   let selectedSlot = -1;
   let maxPower = 1;
 
@@ -160,7 +160,7 @@
     gold = 0;
     pendingCards = null;
     gear = null;
-    gearSpawnTimer = 6;
+    gearSpawnTimer = 4;
     selectedSlot = -1;
     maxPower = 1;
     for (const s of slots) s.hero = null;
@@ -427,11 +427,11 @@
     gearSpawnTimer -= dt;
     if (gearSpawnTimer > 0) return;
     const empties = slots.filter((s) => !s.hero);
-    if (empties.length === 0) { gearSpawnTimer = 3; return; }
+    if (empties.length === 0) { gearSpawnTimer = 2; return; }
     const slot = empties[Math.floor(Math.random() * empties.length)];
     const hp = 12 + stage.index * 3;
     gear = { slotIdx: slots.indexOf(slot), hp, maxHp: hp };
-    gearSpawnTimer = 11 + Math.random() * 6;
+    gearSpawnTimer = 5 + Math.random() * 3;
   }
 
   function breakGear() {
