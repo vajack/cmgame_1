@@ -197,7 +197,7 @@
       const speed = 0.32 / (1 + level * 0.015);
       enemies.push({
         angle, level,
-        hp: 8 + level * 5, maxHp: 8 + level * 5,
+        hp: level, maxHp: level,
         speed, dead: false, hitFlash: 0,
       });
     }
